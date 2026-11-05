@@ -31,3 +31,8 @@ upload receipts rather than writing arbitrary remote paths.
 The media sender exposes the upstream native file and image delivery methods;
 the Host remains responsible for the recipient, source-file authorization,
 turn ownership, cancellation and reporting uncertain delivery outcomes.
+
+The `@xmanrui/dsh-im/markdown-chunks` export exposes the upstream
+structure-aware text chunker. Products must enforce their channel's message
+and aggregate limits, select an authorized recipient, and handle partial or
+unconfirmed delivery without replaying a completed task.

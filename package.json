@@ -54,6 +54,10 @@
       "types": "./types/weixin-media.d.ts",
       "default": "./src/product/weixin-media.mjs"
     },
+    "./markdown-chunks": {
+      "types": "./types/markdown-chunks.d.ts",
+      "default": "./src/channels/shared/markdown-chunks.mjs"
+    },
     "./package.json": "./package.json",
     "./locale/*.json": "./locale/*.json"
   },
@@ -75,6 +79,7 @@
     "src",
     "types/workspace-commands.d.ts",
     "types/weixin-media.d.ts",
+    "types/markdown-chunks.d.ts",
     "PROACTIVE_DELIVERY.md",
     "PROACTIVE_DELIVERY.en.md",
     "docs/client-integration.md",
