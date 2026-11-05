@@ -10,3 +10,11 @@ export function extractWeixinImages(message: { item_list: Array<{ image_item: Re
 
 /** Recognize the exact byte signature accepted by the upstream image bridge. */
 export function detectedImageMediaType(data: Uint8Array): 'image/png' | 'image/jpeg' | 'image/gif' | 'image/webp' | null;
+
+/** One named Weixin file retains the upstream decryptor and an explicit download limit. */
+export interface WeixinFileSource {
+  name: string;
+  load(options: { signal: AbortSignal; maxBytes: number }): Promise<Uint8Array>;
+}
+export function extractBoundedWeixinFiles(message: { item_list: Array<{ file_item: Record<string, unknown> }> },
+  options?: { fetchImpl?: typeof fetch }): WeixinFileSource[];

@@ -25,3 +25,6 @@ The `@xmanrui/dsh-im/weixin-media` export exposes the existing encrypted-image
 loader and byte-signature detector. An embedding Host must authorize the sender
 before loading, enforce its own attachment limits, cancel on revocation and
 submit images through its official attachment admission service.
+The same export supplies bounded Weixin file sources; the embedding Host must
+choose and disclose its file limits and pass the bytes through Host-owned file
+upload receipts rather than writing arbitrary remote paths.
