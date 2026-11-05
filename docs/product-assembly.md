@@ -11,4 +11,7 @@ host services and does not provide user, environment, or credential isolation.
 An embedding product must enforce its own authorization and validate those
 shared services before using this fork in production.
 
-Run `node --test test/host.test.mjs` after installing the locked dependencies.
+Rebuild the tracked Host bundle with `node plugin-src/host/build.mjs` after
+changing Host sources. Run `node --test test/host.test.mjs
+test/host-product-bundle.test.mjs` after installing the locked dependencies;
+the bundle test ensures the published entry enforces the selection as well.
