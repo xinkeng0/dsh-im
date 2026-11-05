@@ -97,7 +97,20 @@ export function createImHostPlugin(internals = {}) {
     name,
     inject,
     async apply(ctx, config = {}) {
-      const unavailableSessionSyncChannels = channels
+      // Product hosts may explicitly assemble a subset of channels. Validate
+      // before registering any services, RPCs, or channel consumers.
+      let selectedChannels = channels;
+      if (config.enabledChannels !== undefined) {
+        const enabled = config.enabledChannels;
+        if (!Array.isArray(enabled) || enabled.length === 0
+          || enabled.some((channel) => typeof channel !== 'string')
+          || new Set(enabled).size !== enabled.length
+          || enabled.some((channel) => !channels.some(([known]) => known === channel))) {
+          throw new TypeError('enabledChannels must contain distinct, known channel names');
+        }
+        selectedChannels = channels.filter(([channel]) => enabled.includes(channel));
+      }
+      const unavailableSessionSyncChannels = selectedChannels
         .map(([channel]) => channel)
         .filter((channel) => channel !== 'office'
           && config[channel]?.harnessBaseUrl !== undefined);
@@ -159,7 +172,7 @@ export function createImHostPlugin(internals = {}) {
         }));
       }
       const activate = async (readyCtx) => {
-        await activateChannels(readyCtx, config, deliveryService);
+        await activateChannels(readyCtx, config, deliveryService, selectedChannels);
       };
       if (typeof ctx?.inject === 'function') {
         await ctx.inject(
@@ -178,7 +191,7 @@ export function createImHostPlugin(internals = {}) {
     },
   });
 
-  async function activateChannels(ctx, config, deliveryService) {
+  async function activateChannels(ctx, config, deliveryService, selectedChannels) {
     // Bind the bot message language before any channel connects, so the first
     // command menu a platform stores is already in the interface language.
     const hostLanguage = startHostLanguage(ctx, config);
@@ -246,7 +259,7 @@ export function createImHostPlugin(internals = {}) {
     const failures = [];
     // Each channel mounts its management RPC before awaiting initialization.
     // Start them together so a slow channel cannot leave later routes absent.
-    await Promise.all(channels.map(async ([channel, start]) => {
+    await Promise.all(selectedChannels.map(async ([channel, start]) => {
       try {
         await start(ctx, channelConfig(config, channel, deliveryService));
       } catch (error) {
@@ -254,7 +267,7 @@ export function createImHostPlugin(internals = {}) {
         logger.error?.(`[dsh-im] failed to activate ${channel}; continuing with the remaining channels`, error);
       }
     }));
-    if (failures.length === channels.length) {
+    if (failures.length === selectedChannels.length) {
       throw new AggregateError(failures, 'dsh-im failed to activate every channel');
     }
     if (typeof ctx?.on === 'function') {

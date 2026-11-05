@@ -448,3 +448,27 @@ test('Host reports aggregate failure only after every channel was attempted', as
   assert.deepEqual(fixture.calls, CHANNELS.map(([channel]) => channel));
   assert.equal(fixture.errors.length, CHANNELS.length);
 });
+
+test('an explicit product channel selection starts only the selected consumers', async () => {
+  const fixture = activationFixture(new Set());
+  await fixture.plugin.apply(fixture.ctx, { enabledChannels: ['weixin'] });
+  assert.deepEqual(fixture.calls, ['weixin']);
+});
+
+test('invalid channel selections fail before publishing services or starting consumers', async () => {
+  for (const enabledChannels of [[], ['weixin', 'weixin'], ['weixin', 'unknown'], ['weixin', 1], 'weixin', null]) {
+    const fixture = activationFixture(new Set());
+    let published = false;
+    fixture.ctx.provide = () => { published = true; };
+    await assert.rejects(() => fixture.plugin.apply(fixture.ctx, { enabledChannels }), TypeError);
+    assert.equal(published, false);
+    assert.deepEqual(fixture.calls, []);
+  }
+});
+
+test('a failure of the only selected channel fails host startup', async () => {
+  const fixture = activationFixture(new Set(['weixin']));
+  await assert.rejects(() => fixture.plugin.apply(fixture.ctx, { enabledChannels: ['weixin'] }),
+    error => error instanceof AggregateError && error.errors.length === 1);
+  assert.deepEqual(fixture.calls, ['weixin']);
+});
