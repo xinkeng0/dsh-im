@@ -275,7 +275,7 @@ function formatSessionRelativeTime(value) {
   return t('{year}年{month}月{day}日', { year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate() });
 }
 
-function sessionListMessage(workspace, sessions, { currentWorkspace = false } = {}) {
+function sessionListMessage(workspace, sessions, { currentWorkspace = false, includeWorkspacePath = true } = {}) {
   const rows = sessions.map((session) => {
     const sessionId = safeDisplayText(session?.sessionId);
     if (!sessionId) throw new TypeError('Harness returned an invalid session id');
@@ -286,10 +286,10 @@ function sessionListMessage(workspace, sessions, { currentWorkspace = false } = 
     const annotation = `${timeText ? ` · ${timeText}` : ''}${session?.archived === true ? t('（已归档）') : ''}`;
     return `${title}${annotation}\n   ID: ${sessionId}`;
   });
-  if (rows.length === 0) return t(`工作区：{workspace}
-该工作区暂无会话。`, { workspace });
+  if (rows.length === 0) return includeWorkspacePath ? t(`工作区：{workspace}
+该工作区暂无会话。`, { workspace }) : t('当前工作区暂无会话。');
   return [
-    t('工作区：{workspace}', { workspace }),
+    ...(includeWorkspacePath ? [t('工作区：{workspace}', { workspace })] : []),
     t('会话（{count}）：', { count: rows.length }),
     '',
     ...rows.map((row, index) => `${index + 1}. ${row}`),
@@ -310,7 +310,7 @@ async function currentSessionListWorkspace(harness, conversationKey) {
   return current ?? null;
 }
 
-async function runSessionListCommand(match, harness, conversationKey) {
+async function runSessionListCommand(match, harness, conversationKey, { includeWorkspacePath = true } = {}) {
   const request = parseSessionListArgument(match[1]);
   if (request.error) return commandResult(request.error);
   if (typeof harness?.listWorkspaceSessions !== 'function') {
@@ -330,7 +330,7 @@ async function runSessionListCommand(match, harness, conversationKey) {
       ? listed.sessions
       : listed.sessions.slice(0, request.limit);
     const message = sessionListMessage(workspace, sessions, {
-      currentWorkspace: workspace === currentWorkspace,
+      currentWorkspace: workspace === currentWorkspace, includeWorkspacePath,
     });
     return commandResult(message, splitWorkspaceCommandMessage(message));
   } catch (error) {
@@ -371,7 +371,7 @@ function sessionBindErrorMessage(error) {
   return t('暂时无法绑定会话，请稍后重试。');
 }
 
-async function runSessionBindCommand(command, harness, conversationKey, { includeHistoryHint = true } = {}) {
+async function runSessionBindCommand(command, harness, conversationKey, { includeHistoryHint = true, includeWorkspacePath = true } = {}) {
   const match = SESSION_BIND_COMMAND.exec(command);
   let sessionId = match?.[1];
   if (typeof sessionId === 'string' && /^\d+$/u.test(sessionId)) {
@@ -425,7 +425,7 @@ async function runSessionBindCommand(command, harness, conversationKey, { includ
     const title = safeDisplayText(bound?.title) || t('暂无标题');
     const message = [
       t('当前聊天已绑定会话：'),
-      t('工作区：{workspace}', { workspace }),
+      ...(includeWorkspacePath ? [t('工作区：{workspace}', { workspace })] : []),
       t('标题：{title}', { title }),
       `ID：${boundSessionId}`,
       t('归档：{archived}', { archived: bound?.archived === true ? t('是') : t('否') }),
@@ -549,7 +549,7 @@ export async function runWorkspaceCommand(text, harness, conversationKey, option
     return runSessionBindCommand(command, harness, conversationKey, options);
   }
   const sessionListMatch = SESSION_LIST_COMMAND.exec(command);
-  if (sessionListMatch) return runSessionListCommand(sessionListMatch, harness, conversationKey);
+  if (sessionListMatch) return runSessionListCommand(sessionListMatch, harness, conversationKey, options);
   const listMatch = WORKSPACE_LIST_COMMAND.exec(command);
   if (listMatch) return runWorkspaceListCommand(listMatch, harness);
   const match = WORKSPACE_COMMAND.exec(command);

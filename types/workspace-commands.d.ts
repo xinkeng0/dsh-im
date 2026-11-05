@@ -24,4 +24,4 @@ export interface WorkspaceCommandResult {
 
 /** Execute an IM workspace/session command against the supplied Host adapter. */
 export function runWorkspaceCommand(text: string, harness: WorkspaceCommandHarness, conversationKey: string,
-  options?: { includeHistoryHint?: boolean }): Promise<WorkspaceCommandResult | null>;
+  options?: { includeHistoryHint?: boolean; includeWorkspacePath?: boolean }): Promise<WorkspaceCommandResult | null>;
