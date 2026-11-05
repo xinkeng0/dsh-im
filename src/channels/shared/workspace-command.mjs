@@ -358,6 +358,9 @@ function sessionBindErrorMessage(error) {
   if (error?.code === 'session-summary-unavailable') {
     return t('暂时无法读取该会话的信息，请稍后重试。');
   }
+  if (error?.code === 'session-format-unsupported') {
+    return t('该会话格式尚不支持，请先在电脑端处理该会话格式。');
+  }
   if (error?.code === 'workspace-bot-not-found') {
     return t('机器人正在移除或已重新接入，无法绑定原对话的会话。');
   }
@@ -368,7 +371,7 @@ function sessionBindErrorMessage(error) {
   return t('暂时无法绑定会话，请稍后重试。');
 }
 
-async function runSessionBindCommand(command, harness, conversationKey) {
+async function runSessionBindCommand(command, harness, conversationKey, { includeHistoryHint = true } = {}) {
   const match = SESSION_BIND_COMMAND.exec(command);
   let sessionId = match?.[1];
   if (typeof sessionId === 'string' && /^\d+$/u.test(sessionId)) {
@@ -426,7 +429,7 @@ async function runSessionBindCommand(command, harness, conversationKey) {
       t('标题：{title}', { title }),
       `ID：${boundSessionId}`,
       t('归档：{archived}', { archived: bound?.archived === true ? t('是') : t('否') }),
-      t('发送 /history 查看最近对话。'),
+      ...(includeHistoryHint ? [t('发送 /history 查看最近对话。')] : []),
     ].join('\n');
     return commandResult(message, splitWorkspaceCommandMessage(message));
   } catch (error) {
@@ -531,7 +534,7 @@ export function workspaceSwitchFailureText(error) {
   return null;
 }
 
-export async function runWorkspaceCommand(text, harness, conversationKey) {
+export async function runWorkspaceCommand(text, harness, conversationKey, options = {}) {
   if (!isWorkspaceCommand(text)) return null;
   const config = harness.conversationDirectoryConfig?.();
   if (config?.enabled === true && /^(?:\/(?:workspace|ws|conv|conversation|thread))(?:\s|$)/iu.test(text.trim())) {
@@ -543,7 +546,7 @@ export async function runWorkspaceCommand(text, harness, conversationKey) {
     return runConversationWorkspaceCommand(command, harness, conversationKey);
   }
   if (SESSION_BIND_PREFIX.test(command)) {
-    return runSessionBindCommand(command, harness, conversationKey);
+    return runSessionBindCommand(command, harness, conversationKey, options);
   }
   const sessionListMatch = SESSION_LIST_COMMAND.exec(command);
   if (sessionListMatch) return runSessionListCommand(sessionListMatch, harness, conversationKey);

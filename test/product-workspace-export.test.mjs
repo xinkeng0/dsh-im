@@ -21,4 +21,8 @@ test('public workspace-command export uses the embedding Host for listing and bi
   assert.match((await runWorkspaceCommand('/sessions', harness, 'owner-chat')).message, /工作事项/);
   assert.match((await runWorkspaceCommand('/session 1', harness, 'owner-chat')).message, /session-one/);
   assert.deepEqual(bindings, [['owner-chat', 'session-one']]);
+  const embedded = await runWorkspaceCommand('/session 1', harness, 'owner-chat', { includeHistoryHint: false });
+  assert.doesNotMatch(embedded.message, /\/history/);
+  harness.bindWorkspaceSession = async () => { throw Object.assign(new Error('format'), { code: 'session-format-unsupported' }); };
+  assert.match((await runWorkspaceCommand('/session session-one', harness, 'owner-chat')).message, /格式尚不支持/);
 });
