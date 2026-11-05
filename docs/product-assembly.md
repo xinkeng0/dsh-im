@@ -15,3 +15,8 @@ Rebuild the tracked Host bundle with `node plugin-src/host/build.mjs` after
 changing Host sources. Run `node --test test/host.test.mjs
 test/host-product-bundle.test.mjs` after installing the locked dependencies;
 the bundle test ensures the published entry enforces the selection as well.
+
+Products that own their own channel lifecycle may import
+`@xmanrui/dsh-im/workspace-commands`. They must provide a Host adapter that
+authorizes every workspace, session list and binding before returning it; the
+command helper does not provide account isolation or credential management.

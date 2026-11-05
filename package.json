@@ -46,6 +46,10 @@
   "exports": {
     ".": "./lib/index.js",
     "./client": "./lib/client.js",
+    "./workspace-commands": {
+      "types": "./types/workspace-commands.d.ts",
+      "default": "./src/channels/shared/workspace-command.mjs"
+    },
     "./package.json": "./package.json",
     "./locale/*.json": "./locale/*.json"
   },
@@ -65,6 +69,7 @@
     "scripts/verify-session-channel-logos.mjs",
     "scripts/verify-session-title-prefix.mjs",
     "src",
+    "types/workspace-commands.d.ts",
     "PROACTIVE_DELIVERY.md",
     "PROACTIVE_DELIVERY.en.md",
     "docs/client-integration.md",
