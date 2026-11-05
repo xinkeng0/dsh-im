@@ -20,3 +20,8 @@ Products that own their own channel lifecycle may import
 `@xmanrui/dsh-im/workspace-commands`. They must provide a Host adapter that
 authorizes every workspace, session list and binding before returning it; the
 command helper does not provide account isolation or credential management.
+
+The `@xmanrui/dsh-im/weixin-media` export exposes the existing encrypted-image
+loader and byte-signature detector. An embedding Host must authorize the sender
+before loading, enforce its own attachment limits, cancel on revocation and
+submit images through its official attachment admission service.

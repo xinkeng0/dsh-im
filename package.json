@@ -50,6 +50,10 @@
       "types": "./types/workspace-commands.d.ts",
       "default": "./src/channels/shared/workspace-command.mjs"
     },
+    "./weixin-media": {
+      "types": "./types/weixin-media.d.ts",
+      "default": "./src/product/weixin-media.mjs"
+    },
     "./package.json": "./package.json",
     "./locale/*.json": "./locale/*.json"
   },
@@ -70,6 +74,7 @@
     "scripts/verify-session-title-prefix.mjs",
     "src",
     "types/workspace-commands.d.ts",
+    "types/weixin-media.d.ts",
     "PROACTIVE_DELIVERY.md",
     "PROACTIVE_DELIVERY.en.md",
     "docs/client-integration.md",
