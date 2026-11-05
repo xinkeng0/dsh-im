@@ -28,3 +28,6 @@ submit images through its official attachment admission service.
 The same export supplies bounded Weixin file sources; the embedding Host must
 choose and disclose its file limits and pass the bytes through Host-owned file
 upload receipts rather than writing arbitrary remote paths.
+The media sender exposes the upstream native file and image delivery methods;
+the Host remains responsible for the recipient, source-file authorization,
+turn ownership, cancellation and reporting uncertain delivery outcomes.

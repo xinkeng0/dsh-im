@@ -1,3 +1,5 @@
+import type { Buffer } from 'node:buffer';
+
 /** One authenticated Weixin image is loaded lazily and bounded by the embedding Host. */
 export interface WeixinImageSource {
   name: string;
@@ -18,3 +20,16 @@ export interface WeixinFileSource {
 }
 export function extractBoundedWeixinFiles(message: { item_list: Array<{ file_item: Record<string, unknown> }> },
   options?: { fetchImpl?: typeof fetch }): WeixinFileSource[];
+/** Send a Host-authorized byte snapshot to the current Weixin recipient. */
+export interface WeixinMediaSendRequest {
+  baseUrl: string;
+  token: string;
+  toUserId: string;
+  contextToken: string;
+  file: { fileName: string; bytes: Buffer; deliveryKey: string };
+  signal: AbortSignal;
+}
+export function createWeixinMediaSender(options?: { fetchImpl?: typeof fetch; uploadFetchImpl?: typeof fetch }): {
+  sendFile(request: WeixinMediaSendRequest): Promise<{ messageId: string }>;
+  sendImage(request: WeixinMediaSendRequest): Promise<{ messageId: string }>;
+};

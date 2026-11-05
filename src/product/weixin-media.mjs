@@ -1,8 +1,14 @@
 /** Public media primitives for Hosts embedding the existing Weixin channel. */
-import { extractWeixinFiles, extractWeixinImages } from '../channels/weixin/weixin-api.mjs';
+import { createWeixinApi, extractWeixinFiles, extractWeixinImages } from '../channels/weixin/weixin-api.mjs';
 import { detectedImageMediaType, fetchImageBuffer } from '../channels/shared/image-prompt.mjs';
 
 export { extractWeixinImages, detectedImageMediaType };
+
+/** Expose only the upstream native media senders to an embedding Host. */
+export function createWeixinMediaSender(options) {
+  const api = createWeixinApi(options);
+  return Object.freeze({ sendFile: request => api.sendFile(request), sendImage: request => api.sendImage(request) });
+}
 
 /** Bound the upstream file loader with the same validated CDN stream used for images. */
 export function extractBoundedWeixinFiles(message, { fetchImpl = fetch } = {}) {
